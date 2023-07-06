@@ -1,4 +1,4 @@
-FROM quay.io/app-sre/fluentd-upstream:v1.15-1
+FROM quay.io/app-sre/fluentd-upstream:v1.16-1
 
 USER root
 
