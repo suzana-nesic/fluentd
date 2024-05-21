@@ -2,8 +2,8 @@ FROM quay.io/app-sre/fluentd-upstream:v1.16-1
 
 USER root
 
-RUN apk update && apk upgrade libcrypto3 libssl3 ncurses-libs \
-    ncurses-terminfo-base \
+RUN apk update && apk upgrade busybox busybox-binsh libcrypto3 libssl3 \
+    ncurses-libs ncurses-terminfo-base ssl_client \
     && apk add --no-cache --update --virtual .build-deps build-base ruby-dev \
     && echo 'gem: --no-document' >> /etc/gemrc \
     && gem install fluent-plugin-s3 \
