@@ -2,8 +2,9 @@ FROM quay.io/app-sre/fluentd-upstream:v1.16-1
 
 USER root
 
-RUN apk add --no-cache --update --virtual .build-deps \
+RUN apk update && apk add --no-cache --update --virtual .build-deps \
         build-base ruby-dev \
+    && echo 'gem: --no-document' >> /etc/gemrc \
     && gem install fluent-plugin-s3 \
     && gem install fluent-plugin-slack \
     && gem install fluent-plugin-cloudwatch-logs \
