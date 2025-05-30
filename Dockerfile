@@ -1,18 +1,40 @@
-FROM quay.io/app-sre/fluentd-upstream:v1.16-1
+FROM registry.access.redhat.com/ubi8/ubi
 
 USER root
 
-RUN apk update && apk upgrade busybox busybox-binsh libcrypto3 libssl3 \
-    ncurses-libs ncurses-terminfo-base ssl_client \
-    && apk add --no-cache --update --virtual .build-deps build-base ruby-dev \
-    && echo 'gem: --no-document' >> /etc/gemrc \
-    && gem install fluent-plugin-s3 \
-    && gem install fluent-plugin-slack \
-    && gem install fluent-plugin-cloudwatch-logs \
-    && gem install fluent-plugin-teams \
-    && gem install fluent-plugin-rewrite-tag-filter \
-    && gem install nokogiri \
-    && apk del .build-deps \
-    && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
+RUN dnf -y module enable ruby:3.1 && \
+    dnf -y install \
+        ruby \
+        ruby-devel \
+        gcc \
+        make \
+        ncurses-base \
+        ncurses-libs \
+        openssl \
+        openssl-libs \
+        && echo 'gem: --no-document' >> /etc/gemrc
 
+RUN curl -L https://busybox.net/downloads/binaries/1.36.0-defconfig-multiarch/busybox-x86_64 \
+    -o /usr/local/bin/busybox && \
+    chmod +x /usr/local/bin/busybox && \
+    ln -s /usr/local/bin/busybox /usr/local/bin/sh
+
+# Install Fluentd and plugins
+RUN gem install fluentd \
+    fluent-plugin-s3 \
+    fluent-plugin-slack \
+    fluent-plugin-cloudwatch-logs \
+    fluent-plugin-teams \
+    fluent-plugin-rewrite-tag-filter \
+    nokogiri
+
+# Optional cleanup to reduce image size
+RUN dnf remove -y \
+        gcc \
+        make \
+        ruby-devel \
+    && dnf clean all \
+    && rm -rf /root/.gem /tmp/* /var/tmp/* /var/cache/*
+
+RUN mkdir -p /fluentd/log /fluentd/etc
 USER fluent
