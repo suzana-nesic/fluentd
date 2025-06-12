@@ -38,4 +38,5 @@ RUN dnf remove -y \
 
 RUN mkdir -p /fluentd/log /fluentd/etc
 USER fluent
+EXPOSE 24224 5140
 CMD ["fluentd"]
