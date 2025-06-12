@@ -38,3 +38,4 @@ RUN dnf remove -y \
 
 RUN mkdir -p /fluentd/log /fluentd/etc
 USER fluent
+CMD ["fluentd"]
