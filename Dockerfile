@@ -1,42 +1,26 @@
-FROM registry.access.redhat.com/ubi8/ubi
+FROM registry.redhat.io/openshift-logging/fluentd-rhel9@sha256:a31038fa2b953660e09b7db8411e808075c9037b679ba56a4a6245f56853db56
 
 USER root
 
-RUN dnf -y module enable ruby:3.1 && \
-    dnf -y install \
-        ruby \
-        ruby-devel \
-        gcc \
-        make \
-        ncurses-base \
-        ncurses-libs \
-        openssl \
-        openssl-libs \
-        && echo 'gem: --no-document' >> /etc/gemrc
+RUN microdnf install -y \
+    gcc \
+    make \
+    redhat-rpm-config \
+    ruby-devel \
+    libffi-devel \
+    zlib-devel \
+ && microdnf clean all
 
-RUN curl -L https://busybox.net/downloads/binaries/1.36.0-defconfig-multiarch/busybox-x86_64 \
-    -o /usr/local/bin/busybox && \
-    chmod +x /usr/local/bin/busybox && \
-    ln -s /usr/local/bin/busybox /usr/local/bin/sh
+# skip installing documentation
+RUN echo 'gem: --no-document' >> /etc/gemrc
 
-# Install Fluentd and plugins
-RUN gem install fluentd \
+RUN gem install \
     fluent-plugin-s3 \
     fluent-plugin-slack \
     fluent-plugin-cloudwatch-logs \
     fluent-plugin-teams \
     fluent-plugin-rewrite-tag-filter \
-    nokogiri
+    nokogiri && \
+    rm -rf /usr/share/gems/cache/*.gem /tmp/* /var/tmp/*
 
-# Optional cleanup to reduce image size
-RUN dnf remove -y \
-        gcc \
-        make \
-        ruby-devel \
-    && dnf clean all \
-    && rm -rf /root/.gem /tmp/* /var/tmp/* /var/cache/*
-
-RUN mkdir -p /fluentd/log /fluentd/etc
 USER fluent
-EXPOSE 24224 5140
-CMD ["fluentd"]
