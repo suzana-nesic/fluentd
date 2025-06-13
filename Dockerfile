@@ -5,14 +5,21 @@ USER root
 RUN microdnf install -y \
     gcc \
     make \
+    ncurses-base \
+    ncurses-libs \
     redhat-rpm-config \
     ruby-devel \
-    libffi-devel \
-    zlib-devel \
+    openssl \
+    openssl-libs \
  && microdnf clean all
 
 # skip installing documentation
 RUN echo 'gem: --no-document' >> /etc/gemrc
+
+RUN curl -L https://busybox.net/downloads/binaries/1.36.0-defconfig-multiarch/busybox-x86_64 \
+    -o /usr/local/bin/busybox && \
+    chmod +x /usr/local/bin/busybox && \
+    ln -s /usr/local/bin/busybox /usr/local/bin/sh
 
 RUN gem install \
     fluent-plugin-s3 \
