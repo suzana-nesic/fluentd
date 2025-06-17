@@ -29,5 +29,7 @@ RUN gem install \
     fluent-plugin-rewrite-tag-filter \
     nokogiri && \
     rm -rf /usr/share/gems/cache/*.gem /tmp/* /var/tmp/*
-
+RUN touch /etc/fluent/configs.d/user/fluent.conf
+RUN useradd --create-home --shell /bin/bash fluent
 USER fluent
+CMD ["fluentd", "-c", "/etc/fluent/configs.d/user/fluent.conf"]
