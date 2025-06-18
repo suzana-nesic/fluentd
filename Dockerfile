@@ -16,11 +16,6 @@ RUN microdnf install -y \
 # skip installing documentation
 RUN echo 'gem: --no-document' >> /etc/gemrc
 
-RUN curl -L https://busybox.net/downloads/binaries/1.36.0-defconfig-multiarch/busybox-x86_64 \
-    -o /usr/local/bin/busybox && \
-    chmod +x /usr/local/bin/busybox && \
-    ln -s /usr/local/bin/busybox /usr/local/bin/sh
-
 RUN gem install \
     fluent-plugin-s3 \
     fluent-plugin-slack \
