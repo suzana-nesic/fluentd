@@ -16,15 +16,21 @@ RUN microdnf install -y \
 # skip installing documentation
 RUN echo 'gem: --no-document' >> /etc/gemrc
 
-RUN gem install \
-    fluent-plugin-s3 \
-    fluent-plugin-slack \
-    fluent-plugin-cloudwatch-logs \
-    fluent-plugin-teams \
-    fluent-plugin-rewrite-tag-filter \
-    nokogiri && \
+RUN mkdir -p /fluentd
+
+WORKDIR /fluentd
+
+COPY Gemfile .
+
+RUN gem install bundler:2.4.22 && \
+    bundle config set --local path 'vendor/bundle' && \
+    bundle install && \
     rm -rf /usr/share/gems/cache/*.gem /tmp/* /var/tmp/*
-RUN touch /etc/fluent/configs.d/user/fluent.conf
+
+RUN touch /etc/fluent/fluent.conf
+
 RUN useradd --create-home --shell /bin/bash fluent
+
 USER fluent
-CMD ["fluentd", "-c", "/etc/fluent/configs.d/user/fluent.conf"]
+
+CMD ["fluentd", "-c", "/etc/fluent/fluent.conf"]
