@@ -1,39 +1,23 @@
-# FROM quay.io/app-sre/fluentd-upstream:v1.16-1
-FROM registry.access.redhat.com/ubi9/ruby-33@sha256:187a53898774e040b9719d14212143441ba1070fec346700591a7f4f55291aff
+FROM registry.access.redhat.com/ubi9/ruby-33@sha256:187a53898774e040b9719d14212143441ba1070fec346700591a7f4f55291aff AS base
+# keep in sync with fluentd in Gemfile
+LABEL konflux.additional-tags="1.16.1"
+COPY LICENSE /licenses/LICENSE
 
-USER root
+FROM base as builder
+WORKDIR /opt/app-root/src
+COPY Gemfile Gemfile.lock ./
+RUN bundle config set --local deployment true \
+    bundle config set --local path "vendor/bundle" \
+    && bundle install \
+    && rm -rf .bundle/cache vendor/bundle/ruby/*/cache
+RUN bundle exec fluentd --setup fluentd --setup ./fluent
 
-RUN mkdir -p /fluentd
-
-WORKDIR /fluentd
-
-COPY Gemfile .
-
-# Install required system packages and build dependencies
-RUN dnf update -y && \
-    dnf install -y \
-      gcc \
-      make \
-      redhat-rpm-config \
-      ruby-devel \
-      glibc-langpack-en \
-      openssl-devel \
-      ncurses-libs \
-      which \
-      git \
-      libxml2-devel \
-      libxslt-devel && \
-    gem install bundler:2.4.22 && \
-    bundle config set --local path 'vendor/bundle' && \
-    bundle install && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf
-
-RUN mkdir -p /etc/fluent /etc/fluent/log /etc/fluent/etc
-# WORKDIR /etc/fluent
-
-RUN touch /etc/fluent/fluent.conf
-RUN useradd --create-home --shell /bin/bash fluent
-
-USER fluent
-CMD ["bundle", "exec", "fluentd", "-c", "/etc/fluent/fluent.conf"]
+FROM base as prod
+WORKDIR /opt/app-root/src
+COPY --from=builder --chown=1001:0 /opt/app-root/src .
+USER 0
+RUN mkdir -p /fluentd/log /fluentd/etc /fluentd/plugins \
+    && cp /opt/app-root/src/fluent/fluent.conf /fluentd/etc/fluent.conf \
+    && chown -R 1001:0 /fluentd
+USER 1001
+CMD ["bundle", "exec", "fluentd", "-c", "/fluentd/etc/fluent.conf"]
