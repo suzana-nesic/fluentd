@@ -31,6 +31,15 @@ spec:
     value: Dockerfile
   - name: path-context
     value: .
+  pipelineRef:
+    params:
+    - name: url
+      value: https://github.com/app-sre/shared-pipelines
+    - name: revision
+      value: main
+    - name: pathInRepo
+      value: pipelines/multi-arch-build-pipeline.yaml
+    resolver: git
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while reducing network traffic.
