@@ -5,6 +5,7 @@ COPY LICENSE /licenses/LICENSE
 
 FROM base as builder
 WORKDIR /opt/app-root/src
+# https://github.com/sowawa/fluent-plugin-slack/pull/58
 COPY Gemfile Gemfile.lock fluent-plugin-slack-pull-58.patch ./
 RUN bundle config set --local deployment true \
     bundle config set --local path "vendor/bundle" \
