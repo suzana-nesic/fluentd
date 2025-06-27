@@ -15,9 +15,10 @@ RUN bundle exec fluentd --setup fluentd --setup ./fluent
 FROM base as prod
 WORKDIR /opt/app-root/src
 COPY --from=builder --chown=1001:0 /opt/app-root/src .
+COPY uri_patch.rb /opt/app-root/src/
 USER 0
 RUN mkdir -p /fluentd/log /fluentd/etc /fluentd/plugins \
     && cp /opt/app-root/src/fluent/fluent.conf /fluentd/etc/fluent.conf \
     && chown -R 1001:0 /fluentd
 USER 1001
-CMD ["bundle", "exec", "fluentd", "-c", "/fluentd/etc/fluent.conf"]
+CMD ["bash", "-c", "RUBYOPT='-r./uri_patch.rb' bundle exec fluentd -c /fluentd/etc/fluent.conf"]
