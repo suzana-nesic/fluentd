@@ -1,0 +1,23 @@
+From e9cc84483ad5d5eda33c7279bf4d2f2b2c32bf17 Mon Sep 17 00:00:00 2001
+From: Oscar Baracos <oscar.baracos@gmail.com>
+Date: Mon, 13 Feb 2023 16:59:38 +0400
+Subject: [PATCH] Replace deprecated unescape call
+
+URI.unescape => CGI.unescape
+---
+ lib/fluent/plugin/out_slack.rb | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/fluent/plugin/out_slack.rb b/lib/fluent/plugin/out_slack.rb
+index 1c52223..2e3035b 100644
+--- a/lib/fluent/plugin/out_slack.rb
++++ b/lib/fluent/plugin/out_slack.rb
+@@ -134,7 +134,7 @@ def configure(conf)
+       super
+ 
+       if @channel
+-        @channel = URI.unescape(@channel) # old version compatibility
++        @channel = CGI.unescape(@channel) # old version compatibility
+         if !@channel.start_with?('#') and !@channel.start_with?('@')
+           @channel = '#' + @channel # Add # since `#` is handled as a comment in fluentd conf
+         end

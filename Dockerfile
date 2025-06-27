@@ -5,10 +5,11 @@ COPY LICENSE /licenses/LICENSE
 
 FROM base as builder
 WORKDIR /opt/app-root/src
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile Gemfile.lock patches/fluent-plugin-slack-pull-58.patch ./
 RUN bundle config set --local deployment true \
     bundle config set --local path "vendor/bundle" \
     && bundle install \
+    && patch -d ./vendor/bundle/ruby/3.3.0/gems/fluent-plugin-slack-0.6.7 -p1 < fluent-plugin-slack-pull-58.patch \
     && rm -rf .bundle/cache vendor/bundle/ruby/*/cache
 RUN bundle exec fluentd --setup fluentd --setup ./fluent
 
