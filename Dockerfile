@@ -5,7 +5,7 @@ COPY LICENSE /licenses/LICENSE
 
 FROM base as builder
 WORKDIR /opt/app-root/src
-COPY Gemfile Gemfile.lock patches/fluent-plugin-slack-pull-58.patch ./
+COPY Gemfile Gemfile.lock fluent-plugin-slack-pull-58.patch ./
 RUN bundle config set --local deployment true \
     bundle config set --local path "vendor/bundle" \
     && bundle install \
