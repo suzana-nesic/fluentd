@@ -18,6 +18,8 @@ FROM base as prod
 WORKDIR /opt/app-root/src
 COPY --from=builder --chown=1001:0 /opt/app-root/src .
 USER 0
+# Install hostname command which is required by fluent-plugin-rewrite-tag-filter
+RUN dnf install -y hostname && dnf clean all
 RUN mkdir -p /fluentd/log /fluentd/etc /fluentd/plugins \
     && cp /opt/app-root/src/fluent/fluent.conf /fluentd/etc/fluent.conf \
     && chown -R 1001:0 /fluentd
